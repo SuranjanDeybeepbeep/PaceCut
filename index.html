@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PaceCut - Predict Performance Before You Post</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="logo">PaceCut</div>
+        <div class="nav-links">
+            <a href="#">Features</a>
+            <a href="#">Pricing</a>
+            <a href="#" class="btn btn-primary">Login</a>
+        </div>
+    </nav>
+
+    <!-- Landing View -->
+    <main id="landing-view" class="view active">
+        <section class="hero">
+            <h1>Predict Video Performance <br><span class="text-gradient">Before You Post</span></h1>
+            <p>Upload your short-form video. Our AI identifies pacing drops, weak hooks, and trend misalignment instantly.</p>
+            
+            <div class="upload-container" id="drop-zone">
+                <div class="upload-icon">📁</div>
+                <h3>Drag & Drop your video</h3>
+                <p>or click to browse (MP4, MOV)</p>
+                <input type="file" id="file-input" accept="video/*" hidden>
+                <button class="btn btn-outline" onclick="document.getElementById('file-input').click()">Browse Files</button>
+            </div>
+            
+            <div id="loading-state" class="hidden">
+                <div class="spinner"></div>
+                <p id="loading-text">Analyzing video pacing...</p>
+            </div>
+        </section>
+    </main>
+
+    <!-- Dashboard View -->
+    <main id="dashboard-view" class="view hidden">
+        <div class="dashboard-header">
+            <h2>Analysis Complete</h2>
+            <button class="btn btn-outline" onclick="resetApp()">Analyze Another</button>
+        </div>
+
+        <div class="dashboard-grid">
+            <!-- Left Column: Video & Main Stats -->
+            <div class="col">
+                <div class="card video-card">
+                    <div class="video-placeholder">
+                        <span id="video-filename">video.mp4</span>
+                        <div class="play-btn">▶</div>
+                    </div>
+                </div>
+                
+                <div class="stats-row">
+                    <div class="card score-card">
+                        <div class="score-header">
+                            <h3>Pace Score™</h3>
+                        </div>
+                        <div class="score-display">
+                            <span class="score-value" id="main-score">0</span><span class="score-max">/100</span>
+                        </div>
+                        <p class="score-desc">Strong hook, but visual pacing drops severely after 8 seconds.</p>
+                    </div>
+
+                    <div class="card hook-card">
+                        <h3>First 3s Hook</h3>
+                        <div class="hook-stats">
+                            <div class="hook-item">
+                                <span>Visual</span>
+                                <div class="mini-bar"><div class="fill good" style="width: 85%"></div></div>
+                            </div>
+                            <div class="hook-item">
+                                <span>Audio</span>
+                                <div class="mini-bar"><div class="fill danger" style="width: 30%"></div></div>
+                            </div>
+                        </div>
+                        <p class="hook-desc text-danger">Audio starts too slow.</p>
+                    </div>
+                </div>
+
+                <div class="card trend-card">
+                    <h3>Trend Alignment</h3>
+                    <div class="trend-compare">
+                        <div class="trend-item">
+                            <span class="trend-label">Niche Standard</span>
+                            <span class="trend-val">Cuts every 1.5s</span>
+                        </div>
+                        <div class="trend-item your-video">
+                            <span class="trend-label">Your Video</span>
+                            <span class="trend-val text-warning">Cuts every 3.8s</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Column: Timeline & Recs -->
+            <div class="col">
+                <div class="card timeline-card">
+                    <h3>Retention & Tone Timeline</h3>
+                    <p class="subtitle">Predicted engagement map</p>
+                    
+                    <div class="timeline-container">
+                        <label class="timeline-label-sm">Engagement Drop Risk</label>
+                        <div class="timeline-bar" id="retention-timeline">
+                            <div class="segment good" style="width: 30%" data-tooltip="0:00 - High Engagement"></div>
+                            <div class="segment danger" style="width: 20%" data-tooltip="0:08 - -15% Retention Drop"></div>
+                            <div class="segment warning" style="width: 50%" data-tooltip="0:14 - -5% Retention Drop"></div>
+                        </div>
+                        
+                        <label class="timeline-label-sm mt-1">Audio Emotion Heatmap</label>
+                        <div class="timeline-bar heatmap">
+                            <div class="segment heat-high" style="width: 25%" data-tooltip="Excited / Loud"></div>
+                            <div class="segment heat-low" style="width: 25%" data-tooltip="Silence / Dead Air"></div>
+                            <div class="segment heat-med" style="width: 50%" data-tooltip="Monotone Talking"></div>
+                        </div>
+
+                        <div class="timeline-labels">
+                            <span>0:00</span>
+                            <span>0:15</span>
+                            <span>0:30</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card recommendations-card">
+                    <h3>Actionable Recommendations</h3>
+                    <ul class="rec-list">
+                        <li class="rec-item interactive" data-target="1" onclick="highlightSegment(this, 1)">
+                            <span class="timestamp danger-bg">0:08</span>
+                            <div class="rec-content">
+                                <h4>Dead Air Detected</h4>
+                                <p>Cut 1.5s of silence to recover +4% retention.</p>
+                            </div>
+                        </li>
+                        <li class="rec-item interactive" data-target="2" onclick="highlightSegment(this, 2)">
+                            <span class="timestamp warning-bg">0:14</span>
+                            <div class="rec-content">
+                                <h4>Low Visual Motion</h4>
+                                <p>Add a zoom or B-roll to re-engage viewers.</p>
+                            </div>
+                        </li>
+                        <li class="rec-item interactive" data-target="0" onclick="highlightSegment(this, 0)">
+                            <span class="timestamp good-bg">0:00</span>
+                            <div class="rec-content">
+                                <h4>Strong Hook</h4>
+                                <p>Excellent visual pacing in the first 3 seconds.</p>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Global Tooltip Element -->
+    <div id="global-tooltip" class="tooltip hidden"></div>
+
+    <script src="app.js"></script>
+</body>
+</html>
